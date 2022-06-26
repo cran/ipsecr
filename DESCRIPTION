@@ -1,8 +1,8 @@
 Package: ipsecr
 Type: Package
 Title: Spatially Explicit Capture-Recapture by Inverse Prediction
-Version: 1.1.1
-Date: 2022-06-17
+Version: 1.1.2
+Date: 2022-06-22
 Depends: R (>= 3.5.0), secr (>= 4.5.4)
 Imports: graphics, grDevices, MASS, utils, parallel, stats, tools,
         stringr, nlme, Rcpp (>= 0.12.14)
@@ -17,8 +17,8 @@ LazyDataCompression: xz
 URL: https://github.com/MurrayEfford/ipsecr/,
         https://www.otago.ac.nz/density/
 NeedsCompilation: yes
-Packaged: 2022-06-17 10:11:31 UTC; Murray
+Packaged: 2022-06-22 04:41:43 UTC; Murray
 Author: Murray Efford [aut, cre] (<https://orcid.org/0000-0001-5231-5184>)
 Maintainer: Murray Efford <murray.efford@otago.ac.nz>
 Repository: CRAN
-Date/Publication: 2022-06-20 08:20:06 UTC
+Date/Publication: 2022-06-26 21:30:04 UTC

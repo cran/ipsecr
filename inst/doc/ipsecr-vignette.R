@@ -19,18 +19,6 @@ proxy.ms(captdata)
 # secr function 'collate' works for both secr and ipsecr fits 
 collate(ip.single, ip.single.0)[1,,,]
 
-## ----nontargetdata------------------------------------------------------------
-set.seed(123)
-ch <- captdata
-attr(ch, 'nontarget') <- (1-t(apply(ch,2:3,sum))) * (runif(500)>0.5)
-summary(ch)$nontarget
-
-## ----proxyfn2demo-------------------------------------------------------------
-proxy.ms(ch)
-
-## ----nontargetdemoresults-----------------------------------------------------
-predict(ip.single.nontarget)
-
 ## ----simch, eval = TRUE-------------------------------------------------------
 tr <- traps(captdata)
 mask <- make.mask(tr)
@@ -62,23 +50,44 @@ abline(-265/20,0.05) # true linear trend
 rug(unique(tr$x))    # trap locations
 par(oldpar)
 
+## ----nontargetdata------------------------------------------------------------
+set.seed(123)
+ch <- captdata
+attr(ch, 'nontarget') <- (1-t(apply(ch,2:3,sum))) * (runif(500)>0.5)
+summary(ch)$nontarget
+
+## ----proxyfn2demo-------------------------------------------------------------
+proxy.ms(ch)
+
+## ----nontargetdemoresults-----------------------------------------------------
+predict(ip.single.nontarget)
+
+## ----retrieveipFr, eval = !runall, echo = FALSE-------------------------------
+# previously saved model ... see chunk 'saveall' at end
+load(system.file("example", "ip.Fr.RData", package = "ipsecr"))
+
 ## ----fractional1--------------------------------------------------------------
 collate(ip.single, ip.Fr)[1,,,]
 ip.single$proctime
 ip.Fr$proctime
 
-## ----fractional2, eval = TRUE, message = FALSE--------------------------------
-library(FrF2, quietly = TRUE)
-NP <- 3
-boxsize <- rep(0.2,3)
-design <- FrF2(2^(NP-1),NP, factor.names = c('D','lambda0','sigma'), ncenter = 2)
-data.frame(design)
-# recast factors as numeric
-design <- sapply(design, function(x) as.numeric(as.character(x)))
-design <- sweep(design, MAR=2, STATS = boxsize, FUN='*')
-design
-# apply to beta
-beta <- log(c(5,0.2,25))
-designbeta <- sweep(design, MAR=2, STATS=beta, FUN='+')
-designbeta 
+## ----fractional2, eval = FALSE, message = FALSE, warning = FALSE--------------
+#  if (require('FrF2')) {
+#    NP <- 3
+#    boxsize <- rep(0.2,3)
+#    design <- FrF2(2^(NP-1),NP, factor.names = c('D','lambda0','sigma'), ncenter = 2)
+#    # recast factors as numeric
+#    design <- sapply(design, function(x) as.numeric(as.character(x)))
+#    design <- sweep(design, MAR=2, STATS = boxsize, FUN='*')
+#    # apply to beta
+#    beta <- log(c(5,0.2,25))
+#    designbeta <- sweep(design, MAR=2, STATS=beta, FUN='+')
+#    round(designbeta,3)
+#  }
+
+## ----saveall, echo = FALSE, eval = runall-------------------------------------
+#  save(ip.single, ip.single.0, ip.single.nontarget, ipx,
+#        file = 'd:/density secr 4.5/ipsecr/inst/example/fittedmodels.RData')
+#  save(ip.Fr, file = 'd:/density secr 4.5/ipsecr/inst/example/ip.Fr.RData')
+#  tools::resaveRdaFiles(paste0('d:/density secr 4.5/ipsecr/inst/example'),'xz')
 
