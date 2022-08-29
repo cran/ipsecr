@@ -6,17 +6,17 @@
 
 # function simCH is used by ipsecr.fit for CHmethod 'internal'
 
-simCH <- function (traps, popn, detectfn, detectpar, NT, noccasions, details = list()) {
+simCH <- function (traps, popn, detectfn, detparmat, noccasions, NT = NULL, details = list()) {
     if (ms(traps)) {
-        # if detectpar vary across sessions then should be list of lists
-        if (!is.list(detectpar[[1]])) detectpar <- list(detectpar)
+        # detparmat should be list of matrices
+        if (!is.list(detparmat)) detparmat <- list(detparmat)
         if (length(NT) == 0 || length(unlist(sapply(NT, length))) < length(traps)) NT <- 0
         tmp <- mapply(simCH, 
             traps = traps, 
             popn = popn, 
-            detectpar = detectpar, 
-            NT = as.data.frame(NT),  # detector x session 
+            detparmat = detparmat,     # automatically replicated if single component
             noccasions = noccasions,
+            NT = as.data.frame(NT),  # detector x session 
             MoreArgs = list(detectfn = detectfn, details = details), 
             SIMPLIFY = FALSE)
         MS.capthist(tmp)
@@ -31,7 +31,10 @@ simCH <- function (traps, popn, detectfn, detectpar, NT, noccasions, details = l
             multi = 0, proximity = 1, count = 2, capped = 8, 9)
         if (detectcode == 9) stop ("unsupported detector type")
         
-        detpar <- unlist(detectpar[parnames(detectfn)])  # robust to order of detectpar
+        if (!is.matrix(detparmat)) {
+            detparmat <- matrix(unlist(detparmat), byrow = TRUE, 
+                nrow = nrow(popn), ncol = length(unlist(detparmat)))
+        }
         # optional nontarget rate
         if (is.null(NT) || all(NT<=0)) {
             nontargetcode <- 0
@@ -53,7 +56,7 @@ simCH <- function (traps, popn, detectfn, detectpar, NT, noccasions, details = l
             as.matrix(popn), 
             as.matrix(traps), 
             as.matrix(usge),
-            as.double(detpar), 
+            as.matrix(detparmat),  # matrix 2022-07-04
             as.double(NT),         # vector 2022-06-13
             as.integer(detectfn), 
             as.integer(detectcode), 

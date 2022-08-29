@@ -22,7 +22,9 @@ makeNewData.ipsecr <- function (object, all.levels = FALSE, ...) {
             ## function to add covariates to a list
             ## cov should be dataframe or list of dataframes, one per session (R > 1),
             if (!is.data.frame(cov)) cov <- cov[[session]] ## assume multisession list
-            if (is.null(cov) | (length(cov)==0) | (length(sessvars)==0)) return(basevars)
+            if (is.null(cov) | (length(cov)==0) | (length(sessvars)==0)) {
+                return(basevars)
+            } 
             else {
                 found <- ''
                 for (v in sessvars) {
@@ -64,6 +66,10 @@ makeNewData.ipsecr <- function (object, all.levels = FALSE, ...) {
                 }
                 else
                     basevars$tcov <- 0        # ideally use mean or standardize?
+            }
+            
+            if (v=='random') {
+                basevars$random <- 0
             }
         }
         ## all autovars should now have been dealt with

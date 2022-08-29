@@ -1,3 +1,10 @@
+## ----schematic, fig.width=6, fig.height=6, message = FALSE--------------------
+library(ipsecr)
+par(mfrow=c(2,2), mar=c(1,1,1,1), oma=c(1,1,2,1))
+oldplot <- plot3D.IP(ipsecrdemo)
+plot3D.IP(ipsecrdemo, box=2, oldplot)
+mtext(outer=TRUE, side=3, c('Parameter space','Proxy space'), adj=c(0.21,0.77))
+
 ## ----setup, message = FALSE, results = 'hide'---------------------------------
 library(ipsecr)
 setNumThreads(2)   # adjust to number of available cores
@@ -62,9 +69,12 @@ proxy.ms(ch)
 ## ----nontargetdemoresults-----------------------------------------------------
 predict(ip.single.nontarget)
 
+## ----fractional0, eval = runall-----------------------------------------------
+#  ip.Fr <- ipsecr.fit(captdata, detectfn = 'HHN', details = list(factorial = 'fractional'))
+
 ## ----retrieveipFr, eval = !runall, echo = FALSE-------------------------------
 # previously saved model ... see chunk 'saveall' at end
-load(system.file("example", "ip.Fr.RData", package = "ipsecr"))
+suppressMessages(load(system.file("example", "ip.Fr.RData", package = "ipsecr")))
 
 ## ----fractional1--------------------------------------------------------------
 collate(ip.single, ip.Fr)[1,,,]

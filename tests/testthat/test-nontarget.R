@@ -12,13 +12,14 @@ Sys.setenv(RCPP_PARALLEL_BACKEND = "tinythread")
 set.seed(123)
 trs <- make.grid(8, 8, spacing = 30, detector = 'single')
 pop <- sim.popn(10, trs, 100)
+detparmat <- matrix(c(0.2,20), byrow = TRUE, nrow = nrow(pop), ncol = 2)
 chs <- simCH(
     traps = trs, 
     popn = pop, 
     detectfn = 14, 
-    detectpar = list(lambda0 = 0.2, sigma = 20),
-    NT = 0.5,
+    detparmat = detparmat,
     noccasions = 5, 
+    NT = 0.5,
     details = list(nontargettype='exclusive'))
 summ <- summary(chs)
 nt <- as.numeric(summ$nontarget)[1:5]
@@ -39,13 +40,14 @@ test_that("single-catch simulated detections in presence of interference", {
 set.seed(123)
 trm <- make.grid(8, 8, spacing = 30, detector = 'multi')
 pop <- sim.popn(10, trm, 100)
+detparmat <- matrix(c(0.2,20), byrow = TRUE, nrow = nrow(pop), ncol = 2)
 chm <- simCH(
     traps = trm, 
     popn = pop, 
     detectfn = 14, 
-    detectpar = list(lambda0 = 0.2, sigma = 20),
-    NT = 0.5, 
+    detparmat = detparmat,
     noccasions = 5, 
+    NT = 0.5, 
     details = list(nontargettype='truncated'))
 summ <- summary(chm)
 nt <- as.numeric(summ$nontarget)[1:5]
@@ -70,9 +72,9 @@ chp <- simCH(
     traps = trp, 
     popn = pop, 
     detectfn = 14, 
-    detectpar = list(lambda0 = 0.2, sigma = 20),
-    NT = 0.5,
+    detparmat = list(lambda0 = 0.2, sigma = 20),
     noccasions = 5, 
+    NT = 0.5,
     details = list(nontargettype = 'truncated'))
 summ <- summary(chp)
 nt <- as.numeric(summ$nontarget)[1:5]
@@ -97,9 +99,9 @@ chc <- simCH(
     traps = trc, 
     popn = pop, 
     detectfn = 14, 
-    detectpar = list(lambda0 = 0.2, sigma = 20),
-    NT = 0.5,
+    detparmat = list(lambda0 = 0.2, sigma = 20),
     noccasions = 5, 
+    NT = 0.5,
     details = list(nontargettype = 'exclusive'))
 summ <- summary(chc)
 nt <- as.numeric(summ$nontarget)[1:5]
