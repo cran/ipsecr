@@ -1,6 +1,8 @@
 ## 2022-08-24 miscellaneous
+## 2022-08-30 explicit RNGkind in set.seed
 
 library(ipsecr)
+RNGkind(kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
 
 ## to avoid ASAN/UBSAN errors on CRAN, following advice of Kevin Ushey
 ## e.g. https://github.com/RcppCore/RcppParallel/issues/169
@@ -47,3 +49,4 @@ test_that("simulated Poisson and even populations have expected spacing", {
         tolerance = 1e-4, check.attributes = FALSE)
 })
 ###############################################################################
+

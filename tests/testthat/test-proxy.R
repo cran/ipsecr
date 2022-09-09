@@ -1,6 +1,8 @@
 ## 2022-08-24 1.2.0 start
+## 2022-08-30 explicit RNGkind in set.seed
 
 library(ipsecr)
+RNGkind(kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
 
 ## to avoid ASAN/UBSAN errors on CRAN, following advice of Kevin Ushey
 ## e.g. https://github.com/RcppCore/RcppParallel/issues/169
@@ -70,7 +72,8 @@ test_that("plotProxy means match", {
     out <- plotProxy (parameter = 'D', traps = trps, mask = msk,
         basepar = base, points = FALSE, boxplot = FALSE, nrepl = 20)
     expect_equal(apply(out,2,mean), 
-        c(3.784703, 3.900069, 4.016776, 4.078801, 4.194038),
+        # c(3.784703, 3.900069, 4.016776, 4.078801, 4.194038),  # 1.2.0
+        c(3.797947196, 3.929653612, 3.998393785, 4.073763702, 4.225303122), # 1.3.0
         tolerance = 1e-4, check.attributes = FALSE)
 })
 ###############################################################################

@@ -1,9 +1,12 @@
-## ----schematic, fig.width=6, fig.height=6, message = FALSE--------------------
+## ----schematic, fig.width=6.5, fig.height=6.5, message = FALSE, echo = FALSE----
 library(ipsecr)
-par(mfrow=c(2,2), mar=c(1,1,1,1), oma=c(1,1,2,1))
-oldplot <- plot3D.IP(ipsecrdemo)
-plot3D.IP(ipsecrdemo, box=2, oldplot)
-mtext(outer=TRUE, side=3, c('Parameter space','Proxy space'), adj=c(0.21,0.77))
+if (requireNamespace('plot3D')) {
+    par(mfrow=c(2,2), mar=c(1,1,1,1), oma=c(1,1,2,1))
+    oldplot <- plot3D.IP(ipsecrdemo)
+    plot3D.IP(ipsecrdemo, box=2, oldplot)
+    mtext(outer = TRUE, side = 3, c('Parameter space','Proxy space'), 
+        adj = c(0.21,0.77))
+}
 
 ## ----setup, message = FALSE, results = 'hide'---------------------------------
 library(ipsecr)
@@ -24,7 +27,7 @@ proxy.ms(captdata)
 
 ## ----compareproxy1------------------------------------------------------------
 # secr function 'collate' works for both secr and ipsecr fits 
-collate(ip.single, ip.single.0)[1,,,]
+collate(ip.single, ip.single.1)[1,,,]
 
 ## ----simch, eval = TRUE-------------------------------------------------------
 tr <- traps(captdata)
@@ -96,7 +99,7 @@ ip.Fr$proctime
 #  }
 
 ## ----saveall, echo = FALSE, eval = runall-------------------------------------
-#  save(ip.single, ip.single.0, ip.single.nontarget, ipx,
+#  save(ip.single, ip.single.1, ip.single.nontarget, ipx,
 #        file = 'd:/density secr 4.5/ipsecr/inst/example/fittedmodels.RData')
 #  save(ip.Fr, file = 'd:/density secr 4.5/ipsecr/inst/example/ip.Fr.RData')
 #  tools::resaveRdaFiles(paste0('d:/density secr 4.5/ipsecr/inst/example'),'xz')

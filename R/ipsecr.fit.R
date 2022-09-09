@@ -63,6 +63,24 @@ ipsecr.fit <- function (
         mask <- make.mask(trps, buffer = buffer, nx = 64)
     }
     
+    ##########################
+    # set random seed
+    # (from simulate.lm)
+    ##########################
+    
+    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+        runif(1)
+    }
+    if (is.null(seed)) {
+        RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    }
+    else {
+        R.seed <- get(".Random.seed", envir = .GlobalEnv)
+        set.seed(seed)
+        RNGstate <- structure(seed, kind = as.list(RNGkind()))
+        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    }
+    
     #################################################
     ## detection function
     #################################################
@@ -70,7 +88,7 @@ ipsecr.fit <- function (
     if (is.character(detectfn)) {
         detectfn <- detectionfunctionnumber(detectfn)
     }
-    if (!(detectfn %in% c(0,2,4, 14,16))) {
+    if (!(detectfn %in% c(0,2,4,14,16))) {
         stop (detectionfunctionname(detectfn),
             " detection function not implemented in ipsecr.fit")
     }
@@ -140,7 +158,7 @@ ipsecr.fit <- function (
             details$nontargettype <- 'truncated'   # downgrade for these detectors
         }
     }
-    
+
     sessionlevels <- session(capthist)
     if (ms(capthist)) {
         nsessions <- length(capthist)
@@ -437,16 +455,30 @@ ipsecr.fit <- function (
                 predicted <- rep(NA, NP)
             }
             if (details$debug) {
-                cat ('saving ch to ch.RDS\n')
-                saveRDS(ch, file='ch.RDS')
-                cat('N ', N, '\n')
-                cat('detparmat', unlist(detparmat), '\n')
-                cat('detectfn', detectfn, '\n')
-                print(summary(ch))
-                cat('\nproxyfn\n')
-                print(proxyfn)
-                cat('\npredicted', predicted, '\n')
-                stop()
+                # conditional on specified design point 
+                # (fails with ncores>1)
+                debug <- as.numeric(details$debug)
+                if (abs(debug)==1 || 
+                        (abs(debug)>1 && 
+                                isTRUE(all.equal(designbeta[abs(debug),], 
+                                    beta, tolerance = 1e-4)))) 
+                {
+                    cat('debug point ', abs(debug), '\n')
+                    cat('designbeta ', unlist(designbeta[abs(debug),]), '\n')
+                    cat('N ', N, '\n')
+                    cat('detparmat', unlist(detparmat), '\n')
+                    cat('detectfn', detectfn, '\n')
+                    print(summary(popn))
+                    print(summary(ch))
+                    cat('\npredicted', predicted, '\n')   # proxy vector
+                    
+                    # cat ('saving ch to ch.RDS\n')
+                    # saveRDS(ch, file='ch.RDS')
+                    # cat('\nproxyfn\n')
+                    # print(proxyfn)
+                    
+                    if (debug<0) stop()
+                }
             }
             attempts <- attempts+1
             
@@ -509,24 +541,6 @@ ipsecr.fit <- function (
         ## drop unwanted betas; remember later to adjust parameter count
         start <- start[is.na(fb)]
         NP <- length(start)
-    }
-    
-    ##########################
-    # set random seed
-    # (from simulate.lm)
-    ##########################
-
-    if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
-        runif(1)
-    }
-    if (is.null(seed)) {
-        RNGstate <- get(".Random.seed", envir = .GlobalEnv)
-    }
-    else {
-        R.seed <- get(".Random.seed", envir = .GlobalEnv)
-        set.seed(seed)
-        RNGstate <- structure(seed, kind = as.list(RNGkind()))
-        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
     }
     
     ###########################################
@@ -625,7 +639,9 @@ ipsecr.fit <- function (
         sim <- NULL
         alldesignbeta <- NULL
         tempdistn <- if (details$distribution == 'even') 'even' else 'binomial'
+        
         basedesign <- designbeta[rep(1:nrow(designbeta), details$min.nsim),]
+
         # accumulate simulations until reach precision target or exceed max.nsim
         tries <- 0
         repeat {
@@ -670,7 +686,8 @@ ipsecr.fit <- function (
                 dev <- sapply(sum.sim.lm, function(x) x$sigma) / y / sqrt(nrow(sim))
             }
             # break if have achieved target precision
-            if (!is.null(dev) && !any(is.na(dev)) && all(dev <= dev.max[m])) break
+            devOK <- dev <= dev.max[m]
+            if (!is.null(dev) && !any(is.na(dev)) && all(devOK)) break
             #-------------------------------------------------------------------
         }
         
@@ -785,11 +802,6 @@ ipsecr.fit <- function (
 
         bootstrap <- data.frame (target = y, nsim = nsim, simulated = ymean,
             SE.simulated = yse, q025 = yq[1,], median = yq[2,], q975 = yq[3,])
-        
-        ## biasest not reported, yet
-        # yest <- as.numeric(B %*% matrix((ymean - lambda), ncol = 1))
-        # biasest <- data.frame (estimate = 100 * (beta - yest) / yest,
-        #     SE = 100 * (beta - yest) / yest)
         
     } 
     else {
