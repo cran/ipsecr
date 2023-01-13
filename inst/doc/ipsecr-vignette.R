@@ -6,14 +6,16 @@ if (requireNamespace('plot3D')) {
     plot3D.IP(ipsecrdemo, box=2, oldplot)
     mtext(outer = TRUE, side = 3, c('Parameter space','Proxy space'), 
         adj = c(0.21,0.77))
-}
+} else warning ('install package plot3D to generate Fig. 2')
 
 ## ----setup, message = FALSE, results = 'hide'---------------------------------
 library(ipsecr)
+if (!require("spatstat")) warning ("install spatstat to run vignette code")
 setNumThreads(2)   # adjust to number of available cores
 
 ## ----options, echo = FALSE----------------------------------------------------
 runall <- FALSE
+secr459 <- packageVersion('secr') >= '4.5.9'
 
 ## ----retrieve, eval = !runall, echo = FALSE-----------------------------------
 # previously saved models ... see chunk 'saveall' at end
@@ -98,9 +100,59 @@ ip.Fr$proctime
 #    round(designbeta,3)
 #  }
 
+## ----extraparamdata, eval = secr459-------------------------------------------
+grid <- make.grid(nx = 10, ny = 10, spacing = 20, detector = 'proximity')
+msk <- make.mask(grid, buffer = 100)
+set.seed(123)
+pop <- sim.popn(D = 20, core = grid, buffer = 100, model2D = 'cluster', 
+    details = list(mu = 5, hsigma = 1))
+ch <- sim.capthist(grid, pop, detectfn = 14, detectpar = 
+        list(lambda0 = 0.2, sigma = 20), noccasions = 5)
+plot(ch, border = 20)
+
+## ----extraparamfn-------------------------------------------------------------
+# user function to simulate Thomas (Neyman-Scott) distribution of activity centres
+# expect parameters mu and hsigma in list 'details$extraparam'
+simclusteredpop <- function (mask, D, N, details) {
+    secr::sim.popn(
+        D = D[1], 
+        core = mask, 
+        buffer = 0, 
+        Ndist = 'poisson',    # necessary for N-S cluster process
+        model2D = 'cluster', 
+        details = details$extraparam)
+}
+
+## ----extraparamdemo, eval = requireNamespace("spatstat") && runall------------
+#  # extend the built-in proxy with clumping argument mu
+#  # spatstat fits Thomas process parameters kappa and scale = hsigma^2
+#  # mu is a model parameter derived from mu = D / kappa
+#  clusterproxyT <- function (capthist, ...) {
+#      pr <- ipsecr::proxy.ms(capthist)
+#      pp <- spatstat.geom::as.ppp(secr::centroids(capthist),
+#          W = as.numeric(apply(secr::traps(capthist),2,range)))
+#      tfit <- spatstat.core::thomas.estK(pp)
+#      c(pr, logmu = log(tfit$modelpar['mu']))
+#  }
+#  clusterfitT <- ipsecr.fit(ch, proxyfn = clusterproxyT, mask = msk,
+#      detectfn = 'HHN', details = list(popmethod = simclusteredpop,
+#      extraparam = list(mu = 5, hsigma = NA)), fixed = list(hsigma = 1))
+
+## ----clusterresults-----------------------------------------------------------
+predict(clusterfitT)
+
+## ----clusterfitML, eval = runall----------------------------------------------
+#  clusterfitML <- secr.fit(ch, mask = msk, detectfn = 'HHN', trace = FALSE)
+
+## ----clustercompareML---------------------------------------------------------
+predict(clusterfitML)
+
+## ----adjustvard---------------------------------------------------------------
+secr::adjustVarD(clusterfitML)
+
 ## ----saveall, echo = FALSE, eval = runall-------------------------------------
-#  save(ip.single, ip.single.1, ip.single.nontarget, ipx,
-#        file = 'd:/density secr 4.5/ipsecr/inst/example/fittedmodels.RData')
-#  save(ip.Fr, file = 'd:/density secr 4.5/ipsecr/inst/example/ip.Fr.RData')
-#  tools::resaveRdaFiles(paste0('d:/density secr 4.5/ipsecr/inst/example'),'xz')
+#  save(ip.single, ip.single.1, ip.single.nontarget, ipx, clusterfitT, clusterfitML,
+#        file = '../inst/example/fittedmodels.RData')
+#  save(ip.Fr, file = '../inst/example/ip.Fr.RData')
+#  tools::resaveRdaFiles(paste0('../inst/example'),'xz')
 

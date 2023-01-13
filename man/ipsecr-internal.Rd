@@ -2,6 +2,7 @@
 
 \alias{proxyfn1}
 \alias{proxy.ms}
+\alias{detectionDesignData}
 
 \alias{simpop}
 \alias{simCH}
@@ -22,10 +23,14 @@ These are exported and may be called separately for testing.
 
 proxy.ms(capthist, model = NULL, trapdesigndata = NULL, ...)
 
+detectionDesignData(capthist, byoccasion = FALSE, ...)
+
 proxyfn1(capthist, N.estimator =  c("n", "null","zippin","jackknife"), ...)
 
-simpop(mask, D, N, details = list())
-simCH(traps, popn, detectfn, detparmat, noccasions, NT = NULL, details = list())
+simpop(mask, D, N, details = list(), ...)
+
+simCH(traps, popn, detectfn, detparmat, noccasions, NT = NULL, details = 
+    list(), ...)
       
 rpsv(capthist)
 rpsvi(capthist)
@@ -37,7 +42,9 @@ rpsvi(capthist)
   \item{capthist}{secr capthist object}
   \item{model}{named list of model formulae (see \code{\link{ipsecr.fit}})}
   \item{trapdesigndata}{dataframe with one row for each detector and session}
-  \item{...}{other arguments}
+  \item{...}{other arguments, mostly unused}
+  \item{byoccasion}{logical; if TRUE the output rows are repeated for each occasion }
+  
   \item{N.estimator}{character name of closed-population estimator}
  
   \item{mask}{ secr mask object}
@@ -56,7 +63,7 @@ rpsvi(capthist)
 
 \details{
 
-  \code{proxy.ms} is the default proxyfn used by \code{\link{ipsecr.fit}}. When used internally by \code{\link{ipsecr.fit}}, `model' and `trapdesigndata' are passed automatically. The \dots argument of \code{proxy.ms} may be used to pass arguments to \code{\link{addCovariates}}, especially `spatialdata'.
+  \code{proxy.ms} is the default proxyfn used by \code{\link{ipsecr.fit}}. When used internally by \code{\link{ipsecr.fit}}, `model' and `trapdesigndata' are passed automatically. The \dots argument of \code{proxy.ms} may be used to pass arguments to \code{\link{addCovariates}}, especially `spatialdata'. Function \code{detectionDesignData} is used internally to construct design data for non-constant detection models (lambda0, sigma), used in the glm 'data' argument. The capthist argument for \code{detectionDesignData} should always be a list (wrap a single-session capthist in list()).
 
   \code{simpop} is used by \code{\link{ipsecr.fit}} for popmethod 'internal'. It is faster and simpler than the \pkg{secr} function \code{\link{sim.popn}}. The details component 'distribution' is a character value that may be `poisson' (default) or `even.
 
@@ -74,13 +81,15 @@ rpsvi(capthist)
 
 proxy.ms -- a numeric vector of length >= 3 corresponding to proxies for a wide range of models, 
     including multi-session density and non-target interference models.
+    
+detectionDesignData -- a dataframe with one row per individual per session (byoccasion = FALSE) or one row per individual per occasion per session (byoccasion = TRUE), ordered by session, occasion and individual. Columns include x and y coordinates of the individual's centroid, session, and any individual covariates.
 
 proxyfn1 -- a numeric vector of length 3 corresponding to proxies for 
     population size, capture probability intercept and scale of detection.
 
 simpop -- a \code{\link{popn}} object.
 
-simCH -- a single-session \code{\link{capthist}} object.
+simCH -- a single-session \code{\link{capthist}} object. 
 
 rpsv -- scalar
 
