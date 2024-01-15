@@ -2,7 +2,7 @@
 ## ipsecr/R/utility.R
 #######################################################################################
 
-## 2022-04-04, 2022-05-04, 2022-05-09, 2022-12-26
+## 2022-04-04, 2022-05-04, 2022-05-09, 2022-12-26, 2024-01-15
 #######################################################################################
 
 # Global variables in namespace
@@ -11,7 +11,7 @@
 
 .localstuff <- new.env()
 
-## .localstuff$packageType <- ' pre-release'
+##.localstuff$packageType <- ' pre-release'
 .localstuff$packageType <- ''
 
 .localstuff$countdetectors <- c('count','polygon','transect','unmarked','telemetry')
